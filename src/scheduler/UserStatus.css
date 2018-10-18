@@ -1,0 +1,17 @@
+.userstatus {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+}
+
+.userstatus[data-status="empty"] {
+  background-color: #FFF;
+}
+
+.userstatus[data-status="available"] {
+  background-color: #32CD32;
+}
+
+.userstatus[data-status="unavailable"] {
+ background-color: #FF0000;
+}

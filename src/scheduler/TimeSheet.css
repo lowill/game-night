@@ -1,0 +1,19 @@
+.timesheet {
+  width: 100%;
+  height: 100%;
+}
+
+.weekview {
+  width: 100%;
+  height: 100%;
+}
+
+.weekview-table {
+  table-layout: fixed;
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+.weekview-table td {
+  border: 1px solid black;
+}
