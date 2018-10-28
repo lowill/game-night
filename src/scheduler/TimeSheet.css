@@ -8,12 +8,22 @@
   height: 100%;
 }
 
-.weekview-table {
-  table-layout: fixed;
-  border-collapse: collapse;
-  border: 1px solid black;
+.weekview-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(24, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  justify-items: center;
+  align-items: center;
 }
 
-.weekview-table td {
+.grid-item {
   border: 1px solid black;
+  width: 100%;
+  height: 100%;
+}
+
+.grid-item.col-1:hover ~ .col-1 {
+  background-color: #ddeedd;
 }

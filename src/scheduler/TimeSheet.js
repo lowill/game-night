@@ -8,7 +8,7 @@ import { getCalendarWeek } from './SchedulerUtils.js';
 import './TimeSheet.css';
 
 // Two view modes
-// Week View: Show week and time slots with many "subscribers"
+// Week View: Show week and time slots for yourself
 // Day View: Show individual time slots and which users are available
 
 class TimeSheet extends Component {
@@ -16,8 +16,9 @@ class TimeSheet extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      date: new Date(),
-      displayTimezone: moment.tz.guess()
+      date: moment(),
+      displayTimezone: moment.tz.guess(),
+      test: {}
     };
   }
   render() {
@@ -40,7 +41,8 @@ class WeekView extends Component {
     super(props);
     this.state = {
       date: props.date,
-      timezone: props.timezone
+      timezone: props.timezone,
+      status: {}
     };
   }
   render() {
@@ -59,51 +61,57 @@ class WeekView extends Component {
       currentDate = currentDate.clone().add(1, 'days');
     }
 
-    const blocks = [];
-    for(let dayCounter=0; dayCounter<weekSize; dayCounter++) {
-      blocks[dayCounter] = [];
-      for(let blockCounter=0; blockCounter<blocksPerDay; blockCounter++) {
-        const blockDate = calendarWeek.weekStart.clone().tz(this.state.timezone).set({minute: 0, hour: blockCounter}).add(dayCounter, 'days');
-        blocks[dayCounter].push(<td key={blockDate.unix()}><UserStatus/></td>);
-      }
-    }
+    const gridContents = [];
 
-    // set table headers
-    const tableHeaders1 = [];
-    const tableHeaders2 = [];
     // Top left corner is empty
-    tableHeaders1.push(<th key="empty">&nbsp;</th>);
-    tableHeaders2.push(<th key="col-header">Hour</th>);
+    gridContents.push(<div key="control"><div onClick={this.handleClick.bind(this, WeekView.prevWeek)}>Back</div> <div onClick={this.handleClick.bind(this, WeekView.nextWeek)}>Forward</div></div>);
+    const rowHeaders2 = [];
+    rowHeaders2.push(<div key="col-header">Hour</div>);
     for(let dayCounter=0; dayCounter<weekSize; dayCounter++) {
       const displayDate = weekDays[dayCounter].format(`MMM Do`);
       const displayDay = weekDays[dayCounter].format(`ddd`);
-      tableHeaders1.push(<th key={weekDays[dayCounter].unix()}>{displayDate}</th>);
-      tableHeaders2.push(<th key={weekDays[dayCounter].unix()}>{displayDay}</th>);
+      gridContents.push(<div key={'header1' + weekDays[dayCounter].unix()}>{displayDate}</div>);
+      rowHeaders2.push(<div key={'header2' + weekDays[dayCounter].unix()}>{displayDay}</div>);
     }
+    gridContents.push(rowHeaders2);
 
-    const blockRows = [];
     for(let blockCounter=0; blockCounter<blocksPerDay; blockCounter++) {
-      const rowContents = [];
-      rowContents.push(<th key={`row-${blockCounter}-header`}>{blockCounter%12 + 1} {blockCounter%12 === 0 ? 'AM' : 'PM'}</th>);
-
+      gridContents.push(<div className="weekview-content-row-header" key={`row-${blockCounter}-header`}>{1 + blockCounter%12} {blockCounter%12 === 0 ? 'AM' : 'PM'}</div>);
       for(let dayCounter=0; dayCounter<weekSize; dayCounter++) {
-        rowContents.push(blocks[dayCounter][blockCounter]);
+        const blockDate = calendarWeek.weekStart.clone().tz(this.state.timezone).set({minute: 0, hour: blockCounter}).add(dayCounter, 'days');
+        const blockDateTimestamp = blockDate.unix();
+        let status = undefined;
+        if(this.state.status[blockDateTimestamp] !== undefined) {
+          status = this.state.status[blockDateTimestamp];
+        }
+        gridContents.push(
+          <div className={`grid-item col-${dayCounter} row-${blockCounter}`} key={blockDateTimestamp}>
+            <UserStatus onClick={this.updateStatus.bind(this, blockDateTimestamp)} status={status} />
+          </div>
+        );
       }
-
-      blockRows.push(<tr>{rowContents}</tr>);
     }
 
     return(
       <div className="weekview">
-        <table className="weekview-table">
-          <tbody>
-            <tr>{tableHeaders1}</tr>
-            <tr>{tableHeaders2}</tr>
-              {blockRows}
-          </tbody>
-        </table>
+        <div className="weekview-grid">
+          {gridContents}
+        </div>
       </div>
     );
+  }
+
+  handleClick = fn => {
+    this.setState(fn);
+  }
+
+  updateStatus = (id, newState) => {
+    this.setState(function(state) {
+      state.status[id] = newState.status;
+      return {
+        status: state.status
+      };
+    });
   }
 }
 
@@ -111,6 +119,20 @@ WeekView.propTypes = {
   date: PropTypes.object,
   timezone: PropTypes.string
 }
+
+WeekView.nextWeek = function(state) {
+  return {
+    date: state.date.add(1, 'weeks')
+  };
+}
+
+WeekView.prevWeek = function(state) {
+  return {
+    date: state.date.subtract(1, 'weeks')
+  };
+}
+
+
 
 
 

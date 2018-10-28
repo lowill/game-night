@@ -11,26 +11,56 @@ describe('UserStatus class', () => {
       ReactDOM.render(<UserStatus/>, div);
     });
 
-    it('should cycle from empty status to available status when clicked', () => {
-      const wrapper = shallow(<UserStatus/>);
-      wrapper.find('div').simulate('click');
-      expect(wrapper.find('div').props()['data-status']).toBe('available');
+    describe('status changes', () => {
+      const statusWrapper = (function() {
+        const state = {
+          status: UserStatus.USER_STATUS_TYPES[0]
+        };
+
+        return {
+          state: state,
+          updateStatus: function(newState) {
+            state.status = newState.status;
+          }
+        };
+      }());
+
+      function simulateOnClick(componentFn, target, count) {
+        let wrapper = shallow(componentFn());
+        for(let i=0; i<count; i++) {
+          const el = wrapper.find(target);
+          el.props().onClick();
+          wrapper = shallow(componentFn());  // faking re-render
+        }
+        return wrapper;
+      }
+
+      // I want to return a new React element each time I need the component
+      function getComponent() {
+        return <UserStatus status={statusWrapper.state.status} onClick={statusWrapper.updateStatus}/>;
+      }
+
+      beforeEach(() => {
+        statusWrapper.state.status = UserStatus.USER_STATUS_TYPES[0];
+      });
+
+      it('should cycle from empty status to available status when clicked', () => {
+        const wrapper = simulateOnClick(getComponent, 'div', 1);
+        expect(wrapper.find('div').props()['data-status']).toBe('available');
+      });
+
+      it('should cycle from available status to unavailable status when clicked twice', () => {
+        const wrapper = simulateOnClick(getComponent, 'div', 2);
+        expect(wrapper.find('div').props()['data-status']).toBe('unavailable');
+      });
+
+      it('should cycle from empty status to empty status when clicked thrice', () => {
+        const wrapper = simulateOnClick(getComponent, 'div', 3);
+        expect(wrapper.find('div').props()['data-status']).toBe('empty');
+      });
     });
 
-    it('should cycle from available status to unavailable status when clicked twice', () => {
-      const wrapper = shallow(<UserStatus/>);
-      wrapper.find('div').simulate('click');
-      wrapper.find('div').simulate('click');
-      expect(wrapper.find('div').props()['data-status']).toBe('unavailable');
-    });
-
-    it('should cycle from empty status to empty status when clicked thrice', () => {
-      const wrapper = shallow(<UserStatus/>);
-      wrapper.find('div').simulate('click');
-      wrapper.find('div').simulate('click');
-      wrapper.find('div').simulate('click');
-      expect(wrapper.find('div').props()['data-status']).toBe('empty');
-    });
+    
   });
 
   describe('helper functions', () => {

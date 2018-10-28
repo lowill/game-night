@@ -8,49 +8,52 @@ class UserStatus extends Component {
     super(props);
 
     this.state = {
-      status: props.status,
       editable: props.editable
     };
   }
 
   render() {
     return(
-      <div className="userstatus" data-status={this.state.status.name} onClick={this.handleClick}>
-        {this.state.status.content}
+      <div className="userstatus" data-status={this.props.status.name} onClick={this.handleClick}>
+        {this.props.status.content}
       </div>
     );
   }
 
   handleClick = () => {
-    this.setState(UserStatus.cycleStatus);
+    const nextState = UserStatus.cycleStatus(this.props);
+    this.props.onClick(nextState);
   }
 };
 
 UserStatus.propTypes = {
   status: PropTypes.object,
-  editable: PropTypes.bool
+  editable: PropTypes.bool,
+  onClick: PropTypes.func.isRequired
 };
 
 UserStatus.USER_STATUS_TYPES = [{
   name: 'empty',
   code: 0,
-  content: ''
+  content: ' '
 }, {
   name: 'available',
   code: 1,
-  content: '&#x2714;'
+  content: '✔'
 }, {
   name: 'unavailable',
   code: 2,
-  content: '&#x2718;'
+  content: '✘'
 }];
 
 UserStatus.defaultProps = {
-  status: UserStatus.USER_STATUS_TYPES[0]
+  status: UserStatus.USER_STATUS_TYPES[0],
+  onClick: () => {}
 };
 
 UserStatus.cycleStatus = function(state) {
   const nextStatusCode = (state.status.code + 1) % UserStatus.USER_STATUS_TYPES.length;
+
   return {
     status: UserStatus.USER_STATUS_TYPES.find(status => status.code === nextStatusCode)
   };

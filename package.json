@@ -3,12 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "fuzzball": "^1.1.6",
+    "jquery": "^3.3.1",
+    "js-autocomplete": "^1.0.4",
     "module-alias": "^2.1.0",
     "moment-timezone": "^0.5.21",
     "react": "^16.5.1",
     "react-dom": "^16.5.1",
     "react-router": "^4.3.1",
-    "react-scripts": "1.1.5"
+    "react-scripts": "1.1.5",
+    "uuid": "^3.3.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -16,6 +20,7 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
+  "proxy": "http://localhost:3001",
   "devDependencies": {
     "enzyme": "^3.6.0",
     "enzyme-adapter-react-16": "^1.5.0"
