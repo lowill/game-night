@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import fuzz from 'fuzzball';
+import PropTypes from 'prop-types';
+import '@gouch/to-title-case';
+import AutoComplete from './AutoComplete.js';
+import Utils from '../utils/Utils.js';
 
-import AutoCompleteInput from './AutoCompleteInput.js';
 import './GamePicker.css';
 
 class GamePicker extends Component {
@@ -11,27 +13,42 @@ class GamePicker extends Component {
 
     this.state = {
       gamesList: [],
-      ready: false
+      ready: false,
+      selectedGames: []
     };
   }
 
   componentDidMount() {
     fetchGames()
-      .then(body => this.setState(function() {
-        return {
-          gamesList: body.games,
-          ready: true
-        };
-      }));
+      .then(body => {
+        if(body !== undefined) {
+          this.setState(function() {
+            const gamesList = body !== undefined && body.games !== undefined ? body.games : [];
+            return {
+              gamesList: gamesList,
+              ready: true
+            };
+          });          
+        }
+      })
+      .catch(console.error);
+
+    this.updateGamesView();
   }
 
   render() {
+    const title = Utils.isNotBlank(this.props.settings.group)
+      ? `Activity Selection for ${this.props.settings.group}` 
+      : 'Activity Selection';
+
     return(
       <div className="gamepicker">
+        <div className="gamepicker-title">{title}</div>
+        <SelectedGamesView gameTitles={this.state.selectedGames} settings={this.props.settings} onClick={this.handleGameViewClick} />
         {
           this.state.ready === true
-            ? <AutoCompleteInput sourceFn={this.gameSource} onSelect={this.onGameSelected} ref={this.initField} />
-            : null
+            ? <AutoComplete choices={this.state.gamesList} onSelect={this.handleGameSelected} ref={this.initField} />
+            : <div>Waiting for games list...</div>
         }
       </div>
     );
@@ -41,32 +58,110 @@ class GamePicker extends Component {
     this.field = field;
   }
 
-  gameSource = (term, suggest) => {
-    if(this.state.gamesList.length > 0) {
-      const termLower = term.toLowerCase();
-      const fuzzballOptions = {
-        scorer: fuzz.partial_ratio,
-        cutoff: 75
-      };
-      const suggestions = fuzz
-        .extract(termLower, this.state.gamesList, fuzzballOptions)
-        .map(suggestion => suggestion[0]);
-
-      suggest(suggestions);
-    }
+  handleGameSelected = term => {
+    const body = {
+      username: this.props.settings.username,
+      group: this.props.settings.group,
+      selected_game: term
+    };
+    return fetch('http://127.0.0.1:3001/games/select', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    }).then(res => res.json())
+      .then(res => {
+        console.log(res);
+        return res;
+      })
+      .then(this.updateGamesView.bind(this))
+      .catch(console.error);
   }
 
-  onGameSelected(event, term, item) {
+  updateGamesView = () => {
+    fetchSelectedGames(this.props.settings.username, this.props.settings.group)
+      .then(this.setState.bind(this));    
+  }
 
+  handleGameViewClick = () => {
+    this.updateGamesView();
   }
 }
 
+GamePicker.propTypes = {
+  settings: PropTypes.object
+};
+
+GamePicker.defaultProps = {
+  settings: {}
+};
+
+function SelectedGamesView({ gameTitles, settings, onClick }) {
+  return(
+    <div className="selected-games">
+      {gameTitles
+        .map(function convertToObjects(gameTitle) {
+          return {
+            gameTitle: gameTitle
+          };
+        })
+        .map(function GameView({ gameTitle }) {
+          function handleGameViewClick() {
+            const body = { 
+              username: settings.username,
+              group: settings.group,
+              deselected_game: gameTitle
+            };
+            return fetch('http://127.0.0.1:3001/games/deselect', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(body)
+            })
+              .then(res => res.json())
+              .then(res => console.log(res))
+              .then(onClick)
+              .catch(console.error);
+          }
+          return <div className="game-view" onClick={handleGameViewClick} title="Click to remove" key={gameTitle}>{gameTitle}</div>        
+        })
+      }
+    </div>
+  );
+}
+
 function fetchGames() {
-  const address = 'localhost';
+  const address = '127.0.0.1';
   const port = 3001;
   return fetch(`http://${address}:${port}/games`)
     .then(res => res.json())
     .catch(console.error);
+}
+
+function fetchSelectedGames(username, group) {
+  const body = {
+    username,
+    group
+  };
+
+  return fetch('http://127.0.0.1:3001/games/selected', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    })
+    .then(res => res.json())
+    .then(data => {
+      return function getNewState(state, props) {
+        return {
+          selectedGames: data.selected_games.map(item => item.game_name)
+        };
+      };
+    })
+    .catch(err => console.error(err.message));
 }
 
 export default GamePicker;

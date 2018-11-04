@@ -1,0 +1,10 @@
+.tab-group-buttons {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: row;
+}
+
+.tab-group-button-fill {
+  flex-grow: 1;
+  border-bottom: 1px solid black;
+}

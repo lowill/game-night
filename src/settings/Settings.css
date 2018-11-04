@@ -1,0 +1,25 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 24px;
+  opacity: 1;
+}
+
+.settings-errors-view {
+  height: 0px;
+  overflow: hidden;
+  transition: height 0.25s;
+  color: red;
+  font-size: 10px;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.settings-errors-view[data-show="true"] {
+  height: 12px;
+}
+
+.settings-errors-view[data-show="false"] {
+  height: 0px;
+}

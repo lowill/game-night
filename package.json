@@ -3,13 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@gouch/to-title-case": "^2.2.1",
+    "flatmap": "0.0.3",
     "fuzzball": "^1.1.6",
     "jquery": "^3.3.1",
     "js-autocomplete": "^1.0.4",
+    "merge": "^1.2.1",
     "module-alias": "^2.1.0",
-    "moment-timezone": "^0.5.21",
-    "react": "^16.5.1",
-    "react-dom": "^16.5.1",
+    "moment-timezone": "^0.5.23",
+    "react": "^16.6.0",
+    "react-dom": "^16.6.0",
     "react-router": "^4.3.1",
     "react-scripts": "1.1.5",
     "uuid": "^3.3.2"
@@ -22,7 +25,7 @@
   },
   "proxy": "http://localhost:3001",
   "devDependencies": {
-    "enzyme": "^3.6.0",
-    "enzyme-adapter-react-16": "^1.5.0"
+    "enzyme": "^3.7.0",
+    "enzyme-adapter-react-16": "^1.6.0"
   }
 }

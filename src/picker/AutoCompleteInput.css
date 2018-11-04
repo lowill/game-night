@@ -1,0 +1,4 @@
+/* Eliminates input horizontal overflow */
+.autocompleteinput {
+  width: 99.4%;
+}

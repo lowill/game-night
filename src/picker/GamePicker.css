@@ -1,0 +1,22 @@
+/* 99.4% eliminates the horizontal overflow on the input */
+.autocompleteinput {
+  width: 99.4%;
+  height: 48px;
+  border: 1px solid #AAAAEE;
+  border-radius: 4px;
+  font-size: 40px;
+}
+
+.autocomplete-suggestions {
+  font-size: 40px;
+}
+
+.autocomplete-suggestions-suggestion {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.autocomplete-suggestions-suggestion[data-focus="true"] {
+  color: white;
+  background-color: #010101;
+}

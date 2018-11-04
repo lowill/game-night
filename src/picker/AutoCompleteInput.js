@@ -1,23 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import autocomplete from 'js-autocomplete';
+
+import './AutoCompleteInput.css';
 
 class AutoCompleteInput extends Component {
 
   render() {
-    return(<input type="text" className="autocompleteinput" ref={this.initInput}/>);
+    return(<input type="text" className="autocompleteinput" value={this.props.value} ref={this.initInput} onChange={this.handleChange} onFocus={this.handleFocus} onBlur={this.handleBlur}/>);
   }
 
   initInput = input => {
     this.input = input;
-
-    this.autoComplete = new autocomplete({
-      selector: input,
-      minChars: this.props.minChars,
-      menuClass: 'ac-input-choices',
-      source: this.props.sourceFn,
-      onSelect: this.props.onSelect
-    });
   }
 
   clear = () => {
@@ -25,16 +18,24 @@ class AutoCompleteInput extends Component {
     this.input.value = "";
     return value;
   }
+
+  handleChange = event => {
+    this.props.onChange(event);
+  }
+
+  handleBlur = event => {
+    this.props.focusChanged(event, false);
+  }
+
+  handleFocus = event => {
+    this.props.focusChanged(event, true);
+  }
 }
 
 AutoCompleteInput.propTypes = {
-  minChars: PropTypes.number,
-  sourceFn: PropTypes.func,
-  onSelect: PropTypes.func
-};
-
-AutoCompleteInput.defaultProps = {
-  minChars: 3
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  focusChanged: PropTypes.func
 };
 
 export default AutoCompleteInput;

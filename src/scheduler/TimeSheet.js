@@ -117,8 +117,13 @@ class WeekView extends Component {
 
 WeekView.propTypes = {
   date: PropTypes.object,
-  timezone: PropTypes.string
-}
+  timezone: PropTypes.string,
+  settings: PropTypes.object
+};
+
+WeekView.defaultProps = {
+  settings: {}
+};
 
 WeekView.nextWeek = function(state) {
   return {

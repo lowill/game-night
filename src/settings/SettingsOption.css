@@ -1,0 +1,17 @@
+.settings-option {
+  margin-left: 24px;
+  margin-right: 24px;
+  padding: 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-option input {
+  border: 1px solid black;
+}
+
+.settings-option[data-valid="false"] input {
+  border: 1px solid red;
+}

@@ -1,0 +1,12 @@
+.autocomplete-suggestions {
+  width: 100%;
+}
+
+.autocomplete-suggestions[data-hide="true"] {
+  display: none;
+}
+
+.autocomplete-suggestions-suggestion[data-hover="true"] {
+  color: white;
+  background-color: black;
+}
