@@ -18,7 +18,7 @@ class GamePicker extends Component {
     };
   }
 
-  componentDidMount() {
+  refreshGames = () => {
     fetchGames()
       .then(body => {
         if(body !== undefined) {
@@ -36,9 +36,19 @@ class GamePicker extends Component {
     this.updateGamesView();
   }
 
+  componentDidMount() {
+    this.refreshGames();
+  }
+
+  componentDidUpdate(prevProps) {
+    if(prevProps.settings.get('group') !== this.props.settings.get('group')) {
+      this.refreshGames();
+    }
+  }
+
   render() {
-    const title = Utils.isNotBlank(this.props.settings.group)
-      ? `Activity Selection for ${this.props.settings.group}` 
+    const title = Utils.isNotBlank(this.props.settings.get('group'))
+      ? `Activity Selection for ${this.props.settings.get('group')}` 
       : 'Activity Selection';
 
     return(
@@ -60,8 +70,8 @@ class GamePicker extends Component {
 
   handleGameSelected = term => {
     const body = {
-      username: this.props.settings.username,
-      group: this.props.settings.group,
+      username: this.props.settings.get('username'),
+      group: this.props.settings.get('group'),
       selected_game: term
     };
     return fetch('http://127.0.0.1:3001/games/select', {
@@ -71,16 +81,12 @@ class GamePicker extends Component {
       },
       body: JSON.stringify(body)
     }).then(res => res.json())
-      .then(res => {
-        console.log(res);
-        return res;
-      })
       .then(this.updateGamesView.bind(this))
       .catch(console.error);
   }
 
   updateGamesView = () => {
-    fetchSelectedGames(this.props.settings.username, this.props.settings.group)
+    fetchSelectedGames(this.props.settings.get('username'), this.props.settings.get('group'))
       .then(this.setState.bind(this));    
   }
 
@@ -109,8 +115,8 @@ function SelectedGamesView({ gameTitles, settings, onClick }) {
         .map(function GameView({ gameTitle }) {
           function handleGameViewClick() {
             const body = { 
-              username: settings.username,
-              group: settings.group,
+              username: settings.get('username'),
+              group: settings.get('group'),
               deselected_game: gameTitle
             };
             return fetch('http://127.0.0.1:3001/games/deselect', {
@@ -121,7 +127,6 @@ function SelectedGamesView({ gameTitles, settings, onClick }) {
               body: JSON.stringify(body)
             })
               .then(res => res.json())
-              .then(res => console.log(res))
               .then(onClick)
               .catch(console.error);
           }
@@ -142,7 +147,6 @@ function fetchGames() {
 
 function fetchSelectedGames(username, group) {
   const body = {
-    username,
     group
   };
 
@@ -157,7 +161,7 @@ function fetchSelectedGames(username, group) {
     .then(data => {
       return function getNewState(state, props) {
         return {
-          selectedGames: data.selected_games.map(item => item.game_name)
+          selectedGames: data.selected_games.filter(item => item.username === username).map(item => item.game_name)
         };
       };
     })

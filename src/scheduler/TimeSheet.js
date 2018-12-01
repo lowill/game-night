@@ -15,16 +15,18 @@ class TimeSheet extends Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       date: moment(),
       displayTimezone: moment.tz.guess(),
-      test: {}
+      status: {}
     };
   }
+
   render() {
     return(
       <div className="timesheet">
-        <WeekView date={this.state.date} timezone={this.state.displayTimezone} />
+        <WeekView date={this.state.date} timezone={this.state.displayTimezone} settings={this.props.settings} />
       </div>
     );
   }
@@ -32,11 +34,17 @@ class TimeSheet extends Component {
 
 TimeSheet.DEFAULT_TIMEZONE = 'Asia/Tokyo';
 
+TimeSheet.propTypes = {
+  displayTimezone: PropTypes.string,
+  settings: PropTypes.object
+};
+
 TimeSheet.defaultProps = {
-  displayTimezone: TimeSheet.DEFAULT_TIMEZONE
+  displayTimezone: TimeSheet.DEFAULT_TIMEZONE,
 };
 
 class WeekView extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -45,8 +53,23 @@ class WeekView extends Component {
       status: {}
     };
   }
-  render() {
 
+  componentDidMount() {
+    fetchStatus(this.props.settings.get('group'), this.props.settings.get('username'))
+      .then(res => {
+        const newStatus = res.statuses.reduce((statusObj, status) => {
+          statusObj[status.timeslot] = UserStatus.USER_STATUS_TYPES[status.code];
+          return statusObj;
+        }, {});
+        this.setState(function() {
+          return {
+            status: newStatus
+          };
+        });
+      });
+  }
+
+  render() {
     const blockSize = 1;  // TODO: Make dynamic later
     const blocksPerDay = 24/blockSize;
 
@@ -105,13 +128,43 @@ class WeekView extends Component {
     this.setState(fn);
   }
 
-  updateStatus = (id, newState) => {
-    this.setState(function(state) {
-      state.status[id] = newState.status;
+  updateStatus = (id, newState) => {    
+    this.setState((state) => {
       return {
-        status: state.status
-      };
-    });
+        status: {
+          ...state.status,
+          [id]: UserStatus.USER_STATUS_LOADING
+        }
+      }
+    }, () => {
+      const body = JSON.stringify({
+        group: this.props.settings.get('group'),
+        username: this.props.settings.get('username'),
+        timeslot: id,
+        code: newState.status.code
+      });
+      fetch('http://127.0.0.1:3001/calendar/time', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: body
+      })
+      .then(res => {
+        if(res.ok) {
+          this.setState((state) => {
+            // state.status[id] = newState.status;
+            const newStatus = {
+              ...state.status,
+              [id]: newState.status
+            };
+            return {
+              status: newStatus
+            };
+          });
+        }
+      });
+    })
   }
 }
 
@@ -137,7 +190,25 @@ WeekView.prevWeek = function(state) {
   };
 }
 
-
+function fetchStatus(group, username) {
+  const body = JSON.stringify({
+    group: group,
+    username: username
+  });
+  return fetch('http://127.0.0.1:3001/calendar/status', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: body
+  })
+    .then(res => {
+      if(res.ok) {
+        return res.json();
+      }
+      throw new Error(`Failed to fetch status`);
+    });
+}
 
 
 

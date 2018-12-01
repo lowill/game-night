@@ -1,0 +1,97 @@
+const GAMES_TABLE_NAME = 'games_list';
+
+// function initGameTable(db, tableName=GAMES_TABLE_NAME) {
+//   return db.query(`
+//     CREATE TABLE
+//     IF NOT EXISTS
+//     ${tableName} (
+//       name VARCHAR(40) NOT NULL,
+//       PRIMARY KEY(name)
+//     )
+//   `);
+// }
+
+// function addGame(db, gameName) {
+//   return db.query(`
+//     INSERT IGNORE INTO
+//     ${GAMES_TABLE_NAME} (name)
+//     VALUES ( ? )
+//   `,
+//     [gameName]
+//   );
+// }
+
+// function getGames(db) {
+//   return db.query(`
+//     SELECT
+//     *
+//     FROM 
+//     ${GAMES_TABLE_NAME}
+//   `);
+// }
+
+// function getSelectedGames(db, username, group) {
+//   const tableName = `selected_games_${group}`;
+
+//   if(username !== undefined) {
+//     return db.query(`
+//       SELECT game_name
+//       FROM ??
+//       WHERE username = ?
+//     `,
+//       [tableName, username]
+//     );
+//   }
+//   else {
+//     return db.query(`
+//       SELECT game_name, username
+//       FROM ??
+//     `,
+//       [tableName]
+//     );
+//   }
+// }
+
+// function initSelectionsTable(db, group) {
+//   const tableName = `selected_games_${group}`;
+//   if(existingTables.includes(tableName)) return Promise.resolve();
+
+//   return db.query(`
+//     CREATE TABLE
+//     IF NOT EXISTS
+//     ?? (
+//       username VARCHAR(40) NOT NULL,
+//       game_name VARCHAR(40) NOT NULL,
+//       PRIMARY KEY(username, game_name)
+//     )
+//   `, 
+//     [tableName]
+//   )
+//     .then(() => {
+//       existingTables.push(tableName);
+//     });
+// }
+
+// function addSelection(db, username, group, gameName) {
+//   const tableName = `selected_games_${group}`;
+//   return db.query(`
+//     INSERT IGNORE INTO
+//     ?? ( username, game_name )
+//     VALUES
+//     ( ?, ? )
+//   `,
+//     [tableName, username, gameName]
+//   );
+// }
+
+// function removeSelection(db, username, group, gameName) {
+//   const tableName = `selected_games_${group}`;
+//   return db.query(`
+//       DELETE FROM
+//       ??
+//       WHERE
+//       username = ? AND game_name = ?
+//   `,
+//     [tableName, username, gameName]
+//   );
+// }

@@ -6,6 +6,7 @@
     "@gouch/to-title-case": "^2.2.1",
     "flatmap": "0.0.3",
     "fuzzball": "^1.1.6",
+    "immutable": "^4.0.0-rc.12",
     "jquery": "^3.3.1",
     "js-autocomplete": "^1.0.4",
     "merge": "^1.2.1",
@@ -14,7 +15,7 @@
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
     "react-router": "^4.3.1",
-    "react-scripts": "1.1.5",
+    "react-scripts": "^2.1.1",
     "uuid": "^3.3.2"
   },
   "scripts": {
@@ -27,5 +28,11 @@
   "devDependencies": {
     "enzyme": "^3.7.0",
     "enzyme-adapter-react-16": "^1.6.0"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }

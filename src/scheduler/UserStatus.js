@@ -46,6 +46,12 @@ UserStatus.USER_STATUS_TYPES = [{
   content: '✘'
 }];
 
+UserStatus.USER_STATUS_LOADING = {
+  name: 'loading',
+  code: -1,
+  content: ' '
+};
+
 UserStatus.defaultProps = {
   status: UserStatus.USER_STATUS_TYPES[0],
   onClick: () => {}

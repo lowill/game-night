@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Map as IMap } from 'immutable';
 
+import OverviewLayout from './overview/OverviewLayout.js';
 import TabGroup from './components/TabGroup.js';
 import TabItem from './components/TabItem.js';
 import TimeSheet from './scheduler/TimeSheet.js';
@@ -23,11 +25,11 @@ class App extends Component {
     const group = localStorage.getItem('group') || '';
     const darkMode = localStorage.getItem('darkMode') === 'true';
 
-    const settings = {
+    const settings = IMap({
       username,
       group,
       darkMode
-    };
+    });
 
     const validation = validateSettings(settings);
     const dialog = validation.settingsValid === false ? this.renderSettings(settings) : null;
@@ -40,7 +42,7 @@ class App extends Component {
 
   render() {
     return(
-      <div className="App" data-dark-mode={this.state.settings.darkMode}>
+      <div className="App" data-dark-mode={this.state.settings.get('darkMode')}>
         <div className="dialog" data-active={this.state.dialog !== null}>
           {this.state.dialog}
         </div>
@@ -49,7 +51,8 @@ class App extends Component {
         <div className="App-content">
           <TabGroup>
             <TabItem label='Game Picker' key="picker"><GamePicker settings={this.state.settings} /></TabItem>
-            <TabItem label='Scheduler' key="test"><TimeSheet settings={this.state.settings} /></TabItem>
+            <TabItem label='Scheduler' key="scheduler"><TimeSheet settings={this.state.settings} /></TabItem>
+            <TabItem label='Overview' key="overview"><OverviewLayout settings={this.state.settings}><div/></OverviewLayout></TabItem>
           </TabGroup>
         </div>
       </div>
@@ -95,8 +98,10 @@ class GameNightSettings extends Component {
       settingsValid: true
     };
 
+    const settings = props.settings.toObject();
+
     this.state = {
-      settings: props.settings,
+      settings: settings,
       validation: validation,
       // username: username,
       // group: group,
@@ -111,7 +116,7 @@ class GameNightSettings extends Component {
     return(
       <div>
         <div className="settings-dialog-overlay" onClick={this.save}/>
-        <div className="settings-dialog" onClick={function handleClick(event) {event.stopPropagation()}}>
+        <div className="settings-dialog" onClick={function handleClick(event) {event.stopPropagation()}} onKeyDown={this.handleKeyDown}>
           <Settings valid={this.state.validation.settingsValid}>
             <div className="settings-header">Settings</div>
             <SettingsOption valid={this.state.validation.username}><label className="settings-label">Username</label><SettingsTextInput value={this.state.settings.username} onChange={this.handleChange.bind(null, 'username')}/></SettingsOption>
@@ -124,18 +129,28 @@ class GameNightSettings extends Component {
     );
   }
 
+  handleKeyDown = event => {
+    if(event.key === 'Enter') {
+      this.save();
+    }
+  }
+
   handleChange = (key, event) => {
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
     this.setState(function getNewState(prevState) {
-      prevState.settings[key] = value;
+      // prevState.settings[key] = value;
+      const newSettings = {
+        ...prevState.settings,
+        [key]: value
+      };
       return {
-        settings: prevState.settings
+        settings: newSettings
       };
     })
   }
 
   save = event => {
-    const validatedState = validateSettings(this.state.settings);
+    const validatedState = validateSettings(IMap(this.state.settings));
     this.setState(function getNewState(prevState) {
       prevState.validation = validatedState;
       return {
@@ -150,7 +165,25 @@ class GameNightSettings extends Component {
         resolve();
       })
         .then(() => {
-          this.props.onSettingsChanged(this.state.settings);
+          const body = {
+            group_name: this.state.settings.group
+          };
+          return fetch('http://127.0.0.1:3001/groups/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+          });
+        })
+        .then(res => {
+          if(res.ok) {
+            return;
+          }
+          throw new Error('Failed to create group');
+        })
+        .then(() => {
+          this.props.onSettingsChanged(IMap(this.state.settings));
           this.props.close();          
         })
         .catch(console.error);
@@ -164,13 +197,13 @@ GameNightSettings.propTypes = {
   onSettingsChanged: PropTypes.func
 };
 
-function validateSettings(state) {
-  const validatedState = {
-    validUsername: Utils.isNotBlank(state.username),
-    validGroup: Utils.isNotBlank(state.group)
+function validateSettings(settings) {
+  const validatedSettings = {
+    validUsername: Utils.isNotBlank(settings.get('username')),
+    validGroup: Utils.isNotBlank(settings.get('group'))
   };
-  validatedState['settingsValid'] = Object.values(validatedState).reduce((prev, value) => prev && value, true);
-  return validatedState;
+  validatedSettings['settingsValid'] = Object.values(validatedSettings).reduce((prev, value) => prev && value, true);
+  return validatedSettings;
 }
 
 export default App;

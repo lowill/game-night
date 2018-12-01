@@ -3,13 +3,23 @@ import PropTypes from 'prop-types';
 
 class SettingsCheckboxInput extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      checked: props.checked
+    };
+  }
+
   render() {
     return(
-      <input type="checkbox" checked={this.props.checked} onChange={this.handleChange}/>
+      <input type="checkbox" checked={this.state.checked} onChange={this.handleChange}/>
     );
   }
 
   handleChange = event => {
+    this.setState({
+      checked: event.target.checked
+    });
     this.props.onChange(event);
   }
 

@@ -21,11 +21,40 @@
   background-color: #FFF;
 }
 
+.userstatus[data-status="loading"] {
+  background: linear-gradient(270deg, #32cd32, #ff2323);
+  background-size: 400% 400%;
+
+    -webkit-animation: Loading-Animation 3s linear infinite;
+       -moz-animation: Loading-Animation 3s linear infinite;
+            animation: Loading-Animation 3s linear infinite;
+  animation-fill-mode: forwards;
+  animation-direction: alternate;
+  
+}
+
 .userstatus[data-status="available"] {
   background-color: #32CD32;
   color: white;
 }
 
 .userstatus[data-status="unavailable"] {
- background-color: #FF0000;
+  background-color: #FF2323;
+}
+
+
+@-webkit-keyframes Loading-Animation {
+    0% { background-position:0% 50%  }
+   50% { background-position:100% 50%  }
+  100% { background-position:0% 50%  }
+}
+@-moz-keyframes Loading-Animation {
+    0% { background-position:0% 50%  }
+   50% { background-position:100% 50%  }
+  100% { background-position:0% 50%  }
+}
+@keyframes Loading-Animation {
+    0% { background-position:0% 50%  }
+   50% { background-position:100% 50%  }
+  100% { background-position:0% 50%  }
 }
